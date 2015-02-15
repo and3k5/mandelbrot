@@ -20,7 +20,7 @@
 				}
 				return true;
 			})()) {
-				alert("Sorry, it seems that your browser doesn't support Workers\nIf you're using Internet Explorer, consider downloading another browser - please!");
+				alert("Sorry, it seems that your browser doesn't support Workers.");
 			}else{
 				var worker = new Worker("worker.js");
 				var ctx=document.querySelector("canvas").getContext("2d");
