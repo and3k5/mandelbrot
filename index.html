@@ -7,19 +7,7 @@
 		<canvas width="280" height="192" style="background-color:black;"></canvas>
 		<script>
 			
-			if (!(function () {
-				try {
-					var test = new Worker("worker.js");
-					if (window.addEventListener) {
-						return true;
-					} else {
-						return false;
-					}
-				} catch (e) {
-					return false;
-				}
-				return true;
-			})()) {
+			if (!Worker) {
 				alert("Sorry, it seems that your browser doesn't support Workers.");
 			}else{
 				var worker = new Worker("worker.js");
