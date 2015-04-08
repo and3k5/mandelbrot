@@ -37,7 +37,7 @@ Mandelbrot.prototype.maxIteration = 1024;
 Mandelbrot.prototype.width = 100;
 Mandelbrot.prototype.height = 100;
 
-Mandelbrot.prototype.toObj = function (i) {
+Mandelbrot.prototype.toObj = function () {
 	return {width:this.width,height:this.height,maxIteration:this.maxIteration,colorMap:this.colorMap.name};
 };
 
@@ -130,5 +130,5 @@ if (!this.window&&this.constructor.name.toLowerCase().indexOf("worker")!=-1) {
 				postMessage({cmd:DONE});
 				break;
 		}
-	}
+	};
 }
