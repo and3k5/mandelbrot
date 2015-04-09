@@ -1,104 +1,147 @@
-
+<!DOCTYPE html>
 <html>
     <head>
 		<title>Mandelbrot JavaScript Worker by And3k5</title>
+		
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
+		
+		<style>
+			html {
+				font-family: sans-serif;
+			}
+			body {
+				margin-top:20px;
+			}
+			
+			.container .panel-body {
+				min-height:600px;
+			}
+			
+			.container h1 {
+				font-family:Tahoma;
+				font-weight:bold;
+			}
+			
+			.canvaswrapper {
+				width:100%;
+				text-align:center;
+			}
+			
+		</style>
+		
+		<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
+		
+		<script src="src/Mandelbrot.js"></script>
 	</head>
 	<body>
-		<canvas width="280" height="192" style="background-color:black;"></canvas>
-		<script>
-			
-			if (!(function () {
-				try {
-					var test = new Worker("worker.js");
-					if (window.addEventListener) {
-						return true;
-					} else {
-						return false;
-					}
-				} catch (e) {
-					return false;
-				}
-				return true;
-			})()) {
-				alert("Sorry, it seems that your browser doesn't support Workers\nIf you're using Internet Explorer, consider downloading another browser - please!");
-			}else{
-				var worker = new Worker("worker.js");
-				var ctx=document.querySelector("canvas").getContext("2d");
-				method=1;
-				switch (method) {
-					case 0:
-						worker.addEventListener('message', function(e) {
-							ctx.fillStyle=JSON.parse(e.data)[1];
-							ctx.fillRect(JSON.parse(e.data)[0][0],JSON.parse(e.data)[0][1],JSON.parse(e.data)[0][2],JSON.parse(e.data)[0][3]);
-							ctx.fillRect(JSON.parse(e.data)[0][0],191-JSON.parse(e.data)[0][1],JSON.parse(e.data)[0][2],JSON.parse(e.data)[0][3]);
-							//console.log(JSON.parse(e.data)[1]);
-						},false);
-						break;
-					case 1:
-						var pixtable=[];
-						worker.addEventListener('message', function(e) {
-							pixtable.push({style:JSON.parse(e.data)[1],x:JSON.parse(e.data)[0][0],y:JSON.parse(e.data)[0][1],w:JSON.parse(e.data)[0][2],h:JSON.parse(e.data)[0][3]});
-							//ctx.fillRect(JSON.parse(e.data)[0][0],191-JSON.parse(e.data)[0][1],1,1);
-							//console.log(JSON.parse(e.data)[1]);
-						},false);
-						(function () {
-							ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-							for (i in pixtable) {
-								ctx.fillStyle=pixtable[i].style;
-								ctx.fillRect(pixtable[i].x,pixtable[i].y,pixtable[i].w,pixtable[i].h);
-								ctx.fillRect(pixtable[i].x,191-pixtable[i].y,pixtable[i].w,pixtable[i].h);
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<div class="panel-title"><strong>Mandelbrot</strong></div>
+				</div>
+				<div class="panel-body">
+					<div class="canvaswrapper">
+						<canvas width="280" height="192"></canvas>
+					</div>
+					
+					<div class="form-horizontal col-lg-offset-2 col-lg-8">
+						<div class="form-group">
+							<label for="width">Width</label>
+							<input type="number" class="form-control" id="width" value="280">
+						</div>
+						<div class="form-group">
+							<label for="height">Height</label>
+							<input type="number" class="form-control" id="height" value="192">
+						</div>
+						<div class="form-group">
+							<label for="maxIter">Max iterations</label>
+							<input type="number" class="form-control" id="maxIter" value="64">
+						</div>
+						<div class="form-group">
+							<label for="scale">Scale</label>
+							<input type="number" class="form-control" id="scale" value="1">
+						</div>
+						<div class="form-group">
+							<label for="colormap">Colormap</label>
+							<select class="form-control" id="colormap"></select>
+						</div>
+						<div class="form-group">
+							<label for="method">Method</label>
+							<select class="form-control" id="method">
+								<option value="script">Script</option>
+								<option value="worker" selected>Worker</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="submit" class="form-control" id="submit" value="Render Mandelbrot">
+						</div>
+					</div>
+
+					
+					<script>
+						var worker = new Worker("src/Mandelbrot.js");
+						worker.onmessage = function (e) {
+							var command = e.data.cmd;
+							switch (command) {
+								case DONE:
+									if (imagedata!=null) {
+										canvas.getContext("2d").putImageData(imagedata,0,0);
+									}
+									break;
 							}
-							setTimeout(arguments.callee,16);
-						})();
-						break;
-				}
-				
-				
-				worker.postMessage([280,192,8,8,1,512*2]);
-			}
-		</script>
-		<form id="formS" method="get" action="index.html">
-			<fieldset>
-				<p>
-					<label for="width">Width</label>
-					<input id="width" type="number" value="280"></input>
-				</p>
-				<p>
-					<label for="height">Height</label>
-					<input id="height" type="number" value="192"></input>
-				</p>
-				<p>
-					<label for="proc_w">Processor division (width)</label>
-					<input id="proc_w" type="number" value="8"></input>
-				</p>
-				<p>
-					<label for="proc_h">Processor division (width)</label>
-					<input id="proc_h" type="number" value="8"></input>
-				</p>
-				<p>
-					<label for="quality">Quality</label>
-					<input id="quality" type="number" value="1">(1: normal, 2: low, 0.5: high (acts weird))</input>
-				</p>
-				<p>
-					<label for="iterations">Quality</label>
-					<input id="iterations" type="number" value="512"></input>
-				</p>
-				<p>
-					<input type="submit"></input>
-				</p>
-			</fieldset>
-		</form>
-		<script>
-			formS.onsubmit = function (e) { 
-				console.log(this);
-				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-				ctx.canvas.width=parseInt(formS.width.value);
-				ctx.canvas.height=parseInt(formS.height.value)
-				worker.postMessage([parseInt(formS.width.value),parseInt(formS.height.value),parseInt(formS.proc_w.value),parseInt(formS.proc_h.value),parseInt(formS.quality.value),parseInt(formS.iterations.value)]);
-				pixtable=[];
-				e.preventDefault();
-			
-			}
-		</script>
+						}
+						
+						for (var i in Mandelbrot.COLORMAP) {
+							var option = new Option();
+							option.value=i;
+							option.textContent=i;
+							document.querySelector("#colormap").add(option);
+						}
+						
+						document.querySelector("#colormap").querySelector("option[value=DEFAULT]").selected=true;
+						
+						var canvas = document.querySelector("canvas");
+						var imagedata = null;
+						
+						document.querySelector("input#submit").addEventListener("click", function () {
+							var WIDTH = document.querySelector("input#width").value;
+							var HEIGHT = document.querySelector("input#height").value;
+							var MAXITER = document.querySelector("input#maxIter").value;
+							var SCALE = document.querySelector("input#scale").value;
+							var COLORMAP = Mandelbrot.COLORMAP[document.querySelector("select#colormap").value];
+							var METHOD = document.querySelector("select#method").value;
+							
+							var mandelbrot = new Mandelbrot();
+							mandelbrot.width = WIDTH;
+							mandelbrot.height = HEIGHT;
+							mandelbrot.maxIteration = MAXITER;
+							mandelbrot.colorMap = COLORMAP;
+							
+							canvas.width = WIDTH;
+							canvas.height = HEIGHT;
+							
+							switch (METHOD) {
+								case "script":
+									mandelbrot.render(canvas);
+									break;
+								case "worker":
+									var ctx = canvas.getContext("2d");
+									imagedata = ctx.createImageData(WIDTH,HEIGHT);
+									
+									worker.postMessage({cmd:SETOBJ,mandelbrot:mandelbrot.toObj()});
+									worker.postMessage({cmd:RENDER,buffer:imagedata.data.buffer},[imagedata.data.buffer]);
+									break;
+							}
+						});
+					</script>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
