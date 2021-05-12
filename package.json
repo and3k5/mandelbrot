@@ -1,0 +1,27 @@
+{
+    "name": "mandelbrot",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "npx webpack"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/and3k5/mandelbrot.git"
+    },
+    "author": "Anders Kjeldsen",
+    "bugs": {
+        "url": "https://github.com/and3k5/mandelbrot/issues"
+    },
+    "homepage": "https://github.com/and3k5/mandelbrot#readme",
+    "devDependencies": {
+        "@babel/cli": "^7.13.16",
+        "@babel/core": "^7.14.2",
+        "@babel/preset-env": "^7.14.2",
+        "babel-loader": "^8.2.2",
+        "html-loader": "^2.1.2",
+        "html-webpack-plugin": "^5.3.1",
+        "webpack": "^5.37.0",
+        "webpack-cli": "^4.7.0"
+    }
+}
