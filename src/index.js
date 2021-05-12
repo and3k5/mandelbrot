@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { SETOBJ, RENDER, DONE } from "./constants";
 import { Mandelbrot } from "./mandelbrot";
 
@@ -21,12 +22,13 @@ for (const i in Mandelbrot.COLORMAP) {
     document.querySelector("#colormap").add(option);
 }
 
-document.querySelector("#colormap").querySelector("option[value=DEFAULT]").selected = true;
+
+document.querySelector("#colormap").querySelector("option[value=COLORED]").selected = true;
 
 var canvas = document.querySelector("canvas");
 var imagedata = null;
 
-document.querySelector("input#submit").addEventListener("click", () => {
+document.querySelector("button#submit").addEventListener("click", () => {
     const WIDTH = document.querySelector("input#width").value;
     const HEIGHT = document.querySelector("input#height").value;
     const MAXITER = document.querySelector("input#maxIter").value;
