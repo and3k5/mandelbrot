@@ -1,3 +1,5 @@
+import { getIterations } from "./calculate/iterate";
+
 export class Mandelbrot {
 	constructor() {
 		this.colorMap = Mandelbrot.COLORMAP.DEFAULT;
@@ -11,70 +13,22 @@ export class Mandelbrot {
     }
 
     getIterations() {
-        const width			=	this.width;
-        const height			=	this.height;
-        const maxIteration	=	this.maxIteration;
-        let iteration;
-        let pos				=	0;
-        const result			= [];
-
-        for (let x, y=0;y<height;y++) {
-            for (x=0;x<width;x++) {
-                iteration = 0;
-                let i=0;
-                let j=0;
-                while(iteration++ < maxIteration) {
-                    const a = i * i - j * j + ((x << 1) - 1.5 * width) / width;
-                    j = 2 * i * j + ((y << 1) - height) / height;
-                    i = a;
-                    if (i * i + j * j > 4) { 
-                        break;
-                    }
-                }
-                result[pos++]=iteration;
-            }
-        }
-
-
-        return result;
+        return getIterations({ width: this.width, height: this.height, maxIteration: this.maxIteration });
     }
 
     async renderElement(element) {
-        const ctx=element.getContext("2d");
-        
-        const imagedata = ctx.createImageData(this.width,this.height);
-        
-        const iterations = this.getIterations();
-        
-        for (let i = 0, len=iterations.length;i<len;i++) {
-            const d = this.colorMap(iterations[i]);
-            imagedata.data[i*4+0]=d[0];
-            imagedata.data[i*4+1]=d[1];
-            imagedata.data[i*4+2]=d[2];
-            imagedata.data[i*4+3]=255;
-        }
-        
-        ctx.putImageData(imagedata,0,0);
+        return await renderCanvasElement({ element, width: this.width, height: this.height, colorMap: this.colorMap, iterations: this.getIterations(), maxIterations: this.maxIteration });
     }
 
     renderBuffer(buffer) {
-	    const imagedatadata = new Uint8Array(buffer);
-	    
-	    const iterations = this.getIterations();
-	    
-	    for (let i = 0, len=iterations.length;i<len;i++) {
-	        const d = this.colorMap(iterations[i]);
-	        imagedatadata[i*4+0]=d[0];
-	        imagedatadata[i*4+1]=d[1];
-	        imagedatadata[i*4+2]=d[2];
-	        imagedatadata[i*4+3]=255;
-	    }
+        return renderBuffer({ buffer,colorMap: this.colorMap, iterations: this.getIterations(), maxIterations: this.maxIteration });
 	}
 }
 
 Mandelbrot.COLORMAP = {};
 
 import { Colored, Default } from "./colormaps";
+import { renderBuffer, renderCanvasElement } from "./render";
 
 Mandelbrot.COLORMAP.COLORED = Colored;
 

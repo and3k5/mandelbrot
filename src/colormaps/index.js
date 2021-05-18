@@ -1,13 +1,13 @@
-export function Default(i) {
-    const scale = ((i / this.maxIteration) * 255) & 255;
+export function Default(i,maxIteration) {
+    const scale = ((i / maxIteration) * 255) & 255;
     return [scale, scale, scale];
 }
 
-export function Colored(i) {
+export function Colored(i, maxIteration) {
     const result = [0, 0, 0];
 
-    if (i != this.maxIteration) {
-        const c = 3 * Math.log(i) / Math.log(this.maxIteration - 1.0);
+    if (i != maxIteration) {
+        const c = 3 * Math.log(i) / Math.log(maxIteration - 1.0);
         if (c < 1) {
             result[0] = 255 * c;
             return result;

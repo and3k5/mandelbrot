@@ -1,21 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { SETOBJ, RENDER, DONE } from "./constants";
+import { CALC, DONE } from "./constants";
 import { Mandelbrot } from "./mandelbrot";
 
 const worker = new Worker(new URL('./worker.js', import.meta.url));
-worker.onmessage = ({data}) => {
-    const command = data.cmd;
-    switch (command) {
-        case DONE:
-            if (imagedata != null) {
-                console.log(imagedata);
-                canvas.getContext("2d").putImageData(imagedata, 0, 0);
-            }
-            break;
-    }
-}
 
 import { all, getColorMapByName } from "./colormaps"
+import { renderCanvasElement } from './render';
 
 const colorSelector = document.querySelector("#colormap");
 
@@ -51,14 +41,25 @@ document.querySelector("button#submit").addEventListener("click", () => {
     switch (METHOD) {
         case "script":
             console.log("render");
-            mandelbrot.renderElement(canvas);
+            requestAnimationFrame(function () {
+                mandelbrot.renderElement(canvas);
+            });
             break;
         case "worker":
             const ctx = canvas.getContext("2d");
             imagedata = ctx.createImageData(WIDTH, HEIGHT);
-
-            worker.postMessage({ cmd: SETOBJ, mandelbrot: mandelbrot.toObj() });
-            worker.postMessage({ cmd: RENDER, buffer: imagedata.data.buffer }, [imagedata.data.buffer]);
+            worker.addEventListener("message",function ({data}) {
+                const command = data.cmd;
+                switch (command) {
+                    case DONE:
+                        console.log("got iteratiosn",data);
+                        renderCanvasElement({ element: canvas, width: mandelbrot.width, height: mandelbrot.height, colorMap: mandelbrot.colorMap, iterations: data.iterations, maxIterations: mandelbrot.maxIteration });
+                        break;
+                    default:
+                        throw new Error("what");
+                }
+            },{once: true});
+            worker.postMessage({ cmd: CALC, options: { width: mandelbrot.width, height: mandelbrot.height, maxIteration: mandelbrot.maxIteration } });
             break;
     }
 });
