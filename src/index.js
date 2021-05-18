@@ -15,15 +15,18 @@ worker.onmessage = ({data}) => {
     }
 }
 
-for (const i in Mandelbrot.COLORMAP) {
+import { all, getColorMapByName } from "./colormaps"
+
+const colorSelector = document.querySelector("#colormap");
+
+for (const colorMap of all) {
     const option = new Option();
-    option.value = i;
-    option.textContent = i;
-    document.querySelector("#colormap").add(option);
+    option.value = colorMap.name;
+    option.textContent = colorMap.name;
+    colorSelector.add(option);
 }
 
-
-document.querySelector("#colormap").querySelector("option[value=COLORED]").selected = true;
+colorSelector.options[0].selected = true;
 
 var canvas = document.querySelector("canvas");
 var imagedata = null;
@@ -33,7 +36,7 @@ document.querySelector("button#submit").addEventListener("click", () => {
     const HEIGHT = document.querySelector("input#height").value;
     const MAXITER = document.querySelector("input#maxIter").value;
     const SCALE = document.querySelector("input#scale").value;
-    const COLORMAP = Mandelbrot.COLORMAP[document.querySelector("select#colormap").value];
+    const COLORMAP = getColorMapByName(colorSelector.value);
     const METHOD = document.querySelector("select#method").value;
 
     const mandelbrot = new Mandelbrot();

@@ -74,30 +74,10 @@ export class Mandelbrot {
 
 Mandelbrot.COLORMAP = {};
 
-Mandelbrot.COLORMAP.COLORED = function COLORED(i) {
-	const result = [0,0,0];
-	
-	if(i != this.maxIteration) {
-		const c = 3 * Math.log(i)/Math.log(this.maxIteration - 1.0);
-		if (c < 1) {
-			result[0] = 255*c;
-			return result;
-		}
-		result[0] = 255;
-		result[1] = 255;
-		if ( c < 2 ) {
-			result[1] *= c-1;
-		}else{
-			result[2] = 255*(c-2);
-		}
-		return result;
-	}
-	return result;
-};
+import { Colored, Default } from "./colormaps";
 
-Mandelbrot.COLORMAP.DEFAULT = function DEFAULT(i) {
-	const scale = ((i/this.maxIteration)*255)&255;
-	return [scale,scale,scale];
-};
+Mandelbrot.COLORMAP.COLORED = Colored;
+
+Mandelbrot.COLORMAP.DEFAULT = Default;
 
 
