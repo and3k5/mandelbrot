@@ -3,13 +3,7 @@ export async function renderCanvasElement({ element, width, height, iterations, 
     
     const imagedata = ctx.createImageData(width,height);
     
-    for (let i = 0, len=iterations.length;i<len;i++) {
-        const d = colorMap(iterations[i], maxIterations);
-        imagedata.data[i*4+0]=d[0];
-        imagedata.data[i*4+1]=d[1];
-        imagedata.data[i*4+2]=d[2];
-        imagedata.data[i*4+3]=255;
-    }
+    setArrayDataFromIterations(imagedata.data, iterations, maxIterations, colorMap);
     
     ctx.putImageData(imagedata,0,0);
 }
@@ -17,11 +11,15 @@ export async function renderCanvasElement({ element, width, height, iterations, 
 export function renderBuffer({ buffer, iterations, colorMap, maxIterations}) {
     const imagedatadata = new Uint8Array(buffer);
     
+    setArrayDataFromIterations(imagedatadata, iterations, maxIterations, colorMap);
+}
+
+function setArrayDataFromIterations(array, iterations, maxIterations, colorMap) {
     for (let i = 0, len=iterations.length;i<len;i++) {
         const d = colorMap(iterations[i], maxIterations);
-        imagedatadata[i*4+0]=d[0];
-        imagedatadata[i*4+1]=d[1];
-        imagedatadata[i*4+2]=d[2];
-        imagedatadata[i*4+3]=255;
+        array[i*4+0]=d[0];
+        array[i*4+1]=d[1];
+        array[i*4+2]=d[2];
+        array[i*4+3]=255;
     }
 }
