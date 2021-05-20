@@ -20,7 +20,10 @@ colorSelector.options[0].selected = true;
 
 var canvas = document.querySelector("canvas");
 
-document.querySelector("button#submit").addEventListener("click", () => {
+import module from '../wasm/iterate.wasm';
+
+
+document.querySelector("button#submit").addEventListener("click", async () => {
     const WIDTH = document.querySelector("input#width").value;
     const HEIGHT = document.querySelector("input#height").value;
     const MAXITER = document.querySelector("input#maxIter").value;
@@ -51,5 +54,20 @@ document.querySelector("button#submit").addEventListener("click", () => {
             },{once: true});
             worker.postMessage({ cmd: CALC, options: { width: WIDTH, height: HEIGHT, maxIteration: MAXITER } });
             break;
+        case "wasm":
+            var mod = await module({
+                'module': {},
+                // 'env': {
+                //     'memory': new WebAssembly.Memory({ initial: 100, limit: 1000 }),
+                //     'table': new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
+                // },
+                wasi_snapshot_preview1: {
+                    'memory': new WebAssembly.Memory({ initial: 100, limit: 1000 }),
+                    'table': new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
+                }
+            });
+            console.log(mod.instance.exports.main(23));
+            break;
+
     }
 });

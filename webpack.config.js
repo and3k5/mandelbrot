@@ -55,7 +55,11 @@ module.exports = function ({ mode = "production" }) {
                 cssLoader,
                 htmlLoader,
                 jsLoader,
-                imgLoader
+                imgLoader,
+                {
+                    test: /\.wasm$/,
+                    use: ['wasm-loader']
+                }
             ]
         },
         plugins: [
