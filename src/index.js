@@ -1,15 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { CALC, DONE } from "./constants";
-
-const worker = new Worker(new URL('./worker.js', import.meta.url));
-
-import { all, getColorMapByName } from "./colormaps"
-import { renderCanvasElement } from './render';
-import { getIterations } from './calculate/iterate';
+import * as colorMaps from "./colormaps"
+import * as methods from "./methods";
 
 const colorSelector = document.querySelector("#colormap");
 
-for (const colorMap of all) {
+for (const colorMap of colorMaps.all) {
     const option = new Option();
     option.value = colorMap.name;
     option.textContent = colorMap.name;
@@ -18,56 +13,36 @@ for (const colorMap of all) {
 
 colorSelector.options[0].selected = true;
 
+const methodSelector = document.querySelector("select#method");
+
+for (const method of methods.all) {
+    const option = new Option();
+    option.value = method.name;
+    option.textContent = method.label;
+    methodSelector.add(option);
+}
+
+methodSelector.options[0].selected = true;
+
 var canvas = document.querySelector("canvas");
 
-import module from '../wasm/iterate.wasm';
 
+import { run } from './methods';
+import { renderCanvasElement } from './render';
 
 document.querySelector("button#submit").addEventListener("click", async () => {
     const WIDTH = document.querySelector("input#width").value;
     const HEIGHT = document.querySelector("input#height").value;
     const MAXITER = document.querySelector("input#maxIter").value;
-    const COLORMAP = getColorMapByName(colorSelector.value);
-    const METHOD = document.querySelector("select#method").value;
+    const COLORMAP = colorMaps.getColorMapByName(colorSelector.value);
+    const METHOD = methodSelector.value;
 
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
-
-    switch (METHOD) {
-        case "script":
-            console.log("render");
-            requestAnimationFrame(function () {
-                var iterations = getIterations({ width: WIDTH, height: HEIGHT, maxIteration: MAXITER });
-                renderCanvasElement({ element: canvas, width: WIDTH, height: HEIGHT, colorMap: COLORMAP, iterations: iterations, maxIterations: MAXITER });
-            });
-            break;
-        case "worker":
-            worker.addEventListener("message",function ({data}) {
-                const command = data.cmd;
-                switch (command) {
-                    case DONE:
-                        renderCanvasElement({ element: canvas, width: WIDTH, height: HEIGHT, colorMap: COLORMAP, iterations: data.iterations, maxIterations: MAXITER });
-                        break;
-                    default:
-                        throw new Error("what");
-                }
-            },{once: true});
-            worker.postMessage({ cmd: CALC, options: { width: WIDTH, height: HEIGHT, maxIteration: MAXITER } });
-            break;
-        case "wasm":
-            var mod = await module({
-                'module': {},
-                // 'env': {
-                //     'memory': new WebAssembly.Memory({ initial: 100, limit: 1000 }),
-                //     'table': new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
-                // },
-                wasi_snapshot_preview1: {
-                    'memory': new WebAssembly.Memory({ initial: 100, limit: 1000 }),
-                    'table': new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
-                }
-            });
-            console.log(mod.instance.exports.main(23));
-            break;
-
-    }
+    console.debug("run");
+    const start = performance.now();
+    const iterations = await run(METHOD, WIDTH, HEIGHT, MAXITER, COLORMAP);
+    const stop = performance.now();
+    console.debug("Calculation took " + Math.round(stop - start) + "ms");
+    renderCanvasElement({ element: canvas, width: WIDTH, height: HEIGHT, colorMap: COLORMAP, iterations: iterations, maxIterations: MAXITER });
 });
