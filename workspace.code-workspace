@@ -40,7 +40,7 @@
             {
                 "label": "Build wasm (docker)",
                 "type": "shell",
-                "command": "pushd wasm && ./build-wasm.sh",
+                "command": "pushd src && pushd calculate && pushd src && ./build-wasm.sh",
                 "isBackground": false,
                 "presentation": {
                     "echo": true,

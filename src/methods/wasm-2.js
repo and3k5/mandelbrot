@@ -1,4 +1,4 @@
-import module from '../../wasm/iterate.wasm';
+import module from '../calculate/iterate.wasm';
 import { getIterationsByMethod } from '../calculate/iterate';
 
 export async function execute(WIDTH, HEIGHT, MAXITER) {
