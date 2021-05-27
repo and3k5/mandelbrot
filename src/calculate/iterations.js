@@ -1,10 +1,3 @@
-import { getIteration } from "./iteration";
-
-export function getIterations(options) {
-    console.log(getIteration);
-    return getIterationsByMethod(options, getIteration);
-}
-
 export function getIterationsByMethod({ width, height, maxIteration }, method) {
     let pos = 0;
     const result = [];
