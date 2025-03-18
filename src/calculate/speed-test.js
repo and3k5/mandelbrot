@@ -1,12 +1,11 @@
-const fs = require('fs');
+const fs = require("fs");
 console.log("DEM");
 (async function () {
+    const importObject = {};
 
-
-
-    const importObject = {  };
-
-    const wasm = await WebAssembly.compile(fs.readFileSync('./iterate.wasm'));
+    const wasm = await WebAssembly.compile(
+        fs.readFileSync("./iterate.wasm?init")
+    );
     const instance = await WebAssembly.instantiate(wasm, importObject);
 
     const width = 800;
